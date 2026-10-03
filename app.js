@@ -13,33 +13,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('[data-price]').forEach(el => { el.textContent = formatEUR(KIT_PRICE); });
 
-    // ---- Menu móvel ----
+    // ---- Menu lateral ----
     const navToggle = document.getElementById('navToggle');
-    const navDrawer = document.getElementById('navDrawer');
+    const menu = document.getElementById('menu');
+    const menuOverlay = document.getElementById('menuOverlay');
 
-    navToggle.addEventListener('click', () => {
-        const open = navDrawer.classList.toggle('open');
-        navToggle.classList.toggle('active', open);
+    function setMenu(open) {
+        menu.classList.toggle('open', open);
+        menu.setAttribute('aria-hidden', !open);
+        menuOverlay.hidden = !open;
         navToggle.setAttribute('aria-expanded', open);
-    });
+    }
 
-    navDrawer.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-            navDrawer.classList.remove('open');
-            navToggle.classList.remove('active');
-            navToggle.setAttribute('aria-expanded', 'false');
-        });
-    });
+    navToggle.addEventListener('click', () => setMenu(!menu.classList.contains('open')));
+    menuOverlay.addEventListener('click', () => setMenu(false));
+    menu.querySelectorAll('a').forEach(link => link.addEventListener('click', () => setMenu(false)));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
 
-    // ---- Barra de compra fixa ----
-    const buybar = document.getElementById('buybar');
-    window.addEventListener('scroll', () => {
-        buybar.classList.toggle('visible', window.scrollY > 600);
-    }, { passive: true });
+    // ---- Avaliações de clientes (de reviews.js) ----
+    renderReviews(typeof REVIEWS !== 'undefined' ? REVIEWS : []);
 
     // ---- Animações ao fazer scroll ----
     const revealElements = document.querySelectorAll(
-        '.benefit, .detail, .gallery-grid img, .offer-card, .config-card, .ba, .vs, .faq details'
+        '.beneficio, .detalle, .resena, .offer, .config-card, .ba, .vs, .faq-accordion'
     );
 
     revealElements.forEach(el => el.classList.add('reveal'));
@@ -291,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
     marcaSelect.addEventListener('change', () => {
         const marca = marcaSelect.value;
         modeloSelect.innerHTML = '<option value="">Selecione o modelo</option>';
-        anioSelect.innerHTML = '<option value="">Primeiro selecione o modelo</option>';
+        anioSelect.innerHTML = '<option value="">Primero selecciona modelo</option>';
         anioSelect.disabled = true;
 
         if (marca && vehicleData[marca]) {
@@ -340,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="result-vehicle">${brandName} ${modelName} ${anio}</div>
                 <span class="result-price">${formatEUR(KIT_PRICE)}</span>
                 <p class="result-text">Kit completo (dianteiros + traseiros) · IVA incluído · Envio grátis para Portugal continental</p>
-                <a href="${href}" class="btn-gold">Comprar agora →</a>
+                <a href="${href}" class="result-cta">Comprar agora →</a>
             `;
         } else {
             resultado.innerHTML = `
@@ -353,3 +349,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateResult();
 });
+
+function escapeHTML(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function renderReviews(reviews) {
+    const section = document.getElementById('resenas');
+    if (!section || !reviews.length) return;
+
+    const avg = reviews.reduce((sum, r) => sum + Number(r.nota || 0), 0) / reviews.length;
+    document.getElementById('ratingAvg').textContent = avg.toFixed(1).replace('.', ',');
+    document.getElementById('ratingCount').textContent =
+        reviews.length === 1 ? '1 avaliação' : `${reviews.length} avaliações`;
+
+    document.getElementById('resenasList').innerHTML = reviews.map(r => {
+        const nota = Math.max(1, Math.min(5, Math.round(Number(r.nota) || 5)));
+        const initials = escapeHTML(String(r.nombre || '?').split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase());
+        return `
+            <article class="resena">
+                ${r.foto ? `
+                <div class="resena-image">
+                    <img src="${escapeHTML(r.foto)}" alt="Foto enviada por ${escapeHTML(r.nombre)}" loading="lazy">
+                    <div class="resena-badges">
+                        <span class="badge badge-foto"><span class="badge-dot"></span> Foto do cliente</span>
+                        ${r.producto ? `<span class="badge badge-producto">${escapeHTML(r.producto)}</span>` : ''}
+                    </div>
+                </div>` : ''}
+                <div class="resena-content">
+                    <div class="resena-stars">
+                        <span class="stars">${'★'.repeat(nota)}${'☆'.repeat(5 - nota)}</span>
+                        <span class="star-score">${nota.toFixed(1)}</span>
+                    </div>
+                    <p class="resena-text">"${escapeHTML(r.texto)}"</p>
+                    <hr>
+                    <div class="resena-author">
+                        <div class="author-avatar">${r.avatar ? `<img src="${escapeHTML(r.avatar)}" alt="">` : initials}</div>
+                        <div>
+                            <div class="author-name-line">
+                                <span class="author-name">${escapeHTML(r.nombre)}</span>
+                                ${r.verificada ? '<span class="verified">Compra verificada</span>' : ''}
+                            </div>
+                            ${r.detalle ? `<span class="author-details">${escapeHTML(r.detalle)}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            </article>`;
+    }).join('');
+
+    section.hidden = false;
+}

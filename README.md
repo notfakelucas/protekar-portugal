@@ -7,7 +7,8 @@ Website da **ProTekar Portugal** — Tapetes 3D premium feitos à medida para au
 - Bloco de oferta com preço fixo configurável (`KIT_PRICE` em `app.js`)
 - Configurador de veículos com 20 marcas populares em Portugal
 - Comparador antes/depois deslizante e tabela ProTekar vs comum
-- Galeria de fotos do produto instalado e detalhes técnicos
+- Carrossel de fotos do produto instalado e detalhes técnicos
+- Secção de avaliações preenchida a partir de `reviews.js` (oculta enquanto estiver vazia)
 - Perguntas frequentes, barra de compra fixa e design responsivo
 
 ## Tecnologias
@@ -33,6 +34,7 @@ protekar-portugal/
 ├── index.html    # Estrutura HTML completa
 ├── index.css     # Estilos e sistema de design
 ├── app.js        # Lógica da aplicação (KIT_PRICE, CHECKOUT_URL)
+├── reviews.js    # Avaliações reais de clientes de Portugal
 ├── images/       # Fotos do produto
 └── README.md     # Este ficheiro
 ```
