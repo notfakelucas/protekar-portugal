@@ -33,6 +33,80 @@ document.addEventListener('DOMContentLoaded', () => {
     // ---- Avaliações de clientes (de reviews.js) ----
     renderReviews(typeof REVIEWS !== 'undefined' ? REVIEWS : []);
 
+    // ---- Lightbox (fotos ampliadas) ----
+    const lb = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lbImg');
+    const lbCaption = document.getElementById('lbCaption');
+    let lbGroup = [];
+    let lbIndex = 0;
+    let lbReturnFocus = null;
+
+    function lbShow(i) {
+        lbIndex = (i + lbGroup.length) % lbGroup.length;
+        const img = lbGroup[lbIndex];
+        lbImg.src = img.currentSrc || img.src;
+        lbImg.alt = img.alt;
+        lbCaption.textContent = img.alt + (lbGroup.length > 1 ? ` · ${lbIndex + 1} / ${lbGroup.length}` : '');
+        document.getElementById('lbPrev').hidden = document.getElementById('lbNext').hidden = lbGroup.length < 2;
+    }
+    function lbOpen(group, i) {
+        lbGroup = group;
+        lbReturnFocus = document.activeElement;
+        lbShow(i);
+        lb.hidden = false;
+        document.body.style.overflow = 'hidden';
+        document.getElementById('lbClose').focus();
+    }
+    function lbClose() {
+        lb.hidden = true;
+        document.body.style.overflow = '';
+        lbReturnFocus?.focus?.();
+    }
+
+    function makeZoomable(selector, { withIcon = false } = {}) {
+        // As cópias do carrossel (aria-hidden) abrem a mesma foto que o original.
+        const all = [...document.querySelectorAll(selector)];
+        const group = all.filter(img => img.getAttribute('aria-hidden') !== 'true');
+        all.forEach(img => {
+            const target = group.find(g => g.getAttribute('src') === img.getAttribute('src')) || img;
+            img.classList.add('zoomable');
+            if (img.getAttribute('aria-hidden') !== 'true') {
+                img.tabIndex = 0;
+                img.setAttribute('role', 'button');
+            }
+            const open = () => lbOpen(group, group.indexOf(target));
+            img.addEventListener('click', open);
+            img.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+            if (withIcon && img.parentElement && !img.parentElement.querySelector('.zoom-icon')) {
+                img.parentElement.insertAdjacentHTML('beforeend', '<span class="zoom-icon" aria-hidden="true">⤢</span>');
+            }
+        });
+    }
+
+    makeZoomable('.offer-img');
+    makeZoomable('.marquee-track img');
+    makeZoomable('.detalle-image img', { withIcon: true });
+    makeZoomable('.resena-image img', { withIcon: true });
+
+    document.getElementById('lbClose').addEventListener('click', lbClose);
+    document.getElementById('lbPrev').addEventListener('click', () => lbShow(lbIndex - 1));
+    document.getElementById('lbNext').addEventListener('click', () => lbShow(lbIndex + 1));
+    lb.addEventListener('click', (e) => { if (e.target === lb) lbClose(); });
+    document.addEventListener('keydown', (e) => {
+        if (lb.hidden) return;
+        if (e.key === 'Escape') lbClose();
+        if (e.key === 'ArrowLeft') lbShow(lbIndex - 1);
+        if (e.key === 'ArrowRight') lbShow(lbIndex + 1);
+    });
+    let touchX = null;
+    lb.addEventListener('touchstart', (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+    lb.addEventListener('touchend', (e) => {
+        if (touchX === null) return;
+        const dx = e.changedTouches[0].clientX - touchX;
+        if (Math.abs(dx) > 50) lbShow(lbIndex + (dx < 0 ? 1 : -1));
+        touchX = null;
+    });
+
     // ---- Animações ao fazer scroll ----
     const revealElements = document.querySelectorAll(
         '.beneficio, .detalle, .resena, .offer, .config-card, .ba, .vs, .faq-accordion'
@@ -86,203 +160,242 @@ document.addEventListener('DOMContentLoaded', () => {
         renault: {
             name: 'Renault',
             models: {
-                clio: { name: 'Clio', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                megane: { name: 'Mégane', years: ['2024', '2023', '2022', '2021', '2020'] },
-                captur: { name: 'Captur', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
+                clio: { name: 'Clio', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                megane: { name: 'Mégane', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                captur: { name: 'Captur', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
                 kadjar: { name: 'Kadjar', years: ['2023', '2022', '2021', '2020', '2019'] },
-                austral: { name: 'Austral', years: ['2024', '2023', '2022'] },
-                scenic: { name: 'Scénic', years: ['2024', '2023'] }
+                austral: { name: 'Austral', years: ['2026', '2025', '2024', '2023', '2022'] },
+                scenic: { name: 'Scénic', years: ['2026', '2025', '2024', '2023'] }
             }
         },
         peugeot: {
             name: 'Peugeot',
             models: {
-                '208': { name: '208', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                '308': { name: '308', years: ['2024', '2023', '2022', '2021'] },
-                '2008': { name: '2008', years: ['2024', '2023', '2022', '2021', '2020'] },
-                '3008': { name: '3008', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                '5008': { name: '5008', years: ['2024', '2023', '2022', '2021', '2020'] }
+                '208': { name: '208', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                '308': { name: '308', years: ['2026', '2025', '2024', '2023', '2022', '2021'] },
+                '2008': { name: '2008', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                '3008': { name: '3008', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                '5008': { name: '5008', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] }
             }
         },
         citroen: {
             name: 'Citroën',
             models: {
-                c3: { name: 'C3', years: ['2024', '2023', '2022', '2021', '2020'] },
-                c4: { name: 'C4', years: ['2024', '2023', '2022', '2021'] },
-                c5aircross: { name: 'C5 Aircross', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                berlingo: { name: 'Berlingo', years: ['2024', '2023', '2022', '2021', '2020', '2019'] }
+                c3: { name: 'C3', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                c4: { name: 'C4', years: ['2026', '2025', '2024', '2023', '2022', '2021'] },
+                c5aircross: { name: 'C5 Aircross', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                berlingo: { name: 'Berlingo', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] }
             }
         },
         volkswagen: {
             name: 'Volkswagen',
             models: {
-                golf: { name: 'Golf', years: ['2024', '2023', '2022', '2021', '2020', '2019', '2018'] },
-                polo: { name: 'Polo', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                tiguan: { name: 'Tiguan', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                troc: { name: 'T-Roc', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                passat: { name: 'Passat', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                touareg: { name: 'Touareg', years: ['2024', '2023', '2022', '2021', '2020'] }
+                golf: { name: 'Golf', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018'] },
+                polo: { name: 'Polo', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                tiguan: { name: 'Tiguan', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                troc: { name: 'T-Roc', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                passat: { name: 'Passat', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                touareg: { name: 'Touareg', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] }
             }
         },
         bmw: {
             name: 'BMW',
             models: {
-                serie1: { name: 'Série 1', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                serie3: { name: 'Série 3', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                x1: { name: 'X1', years: ['2024', '2023', '2022'] },
-                x3: { name: 'X3', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                x5: { name: 'X5', years: ['2024', '2023', '2022', '2021', '2020', '2019'] }
+                serie1: { name: 'Série 1', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                serie3: { name: 'Série 3', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                x1: { name: 'X1', years: ['2026', '2025', '2024', '2023', '2022'] },
+                x3: { name: 'X3', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                x5: { name: 'X5', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] }
             }
         },
         mercedes: {
             name: 'Mercedes-Benz',
             models: {
-                classeA: { name: 'Classe A', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                classeC: { name: 'Classe C', years: ['2024', '2023', '2022', '2021'] },
-                gla: { name: 'GLA', years: ['2024', '2023', '2022', '2021', '2020'] },
-                glb: { name: 'GLB', years: ['2024', '2023', '2022', '2021', '2020'] },
-                glc: { name: 'GLC', years: ['2024', '2023', '2022', '2021', '2020'] }
+                classeA: { name: 'Classe A', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                classeC: { name: 'Classe C', years: ['2026', '2025', '2024', '2023', '2022', '2021'] },
+                gla: { name: 'GLA', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                glb: { name: 'GLB', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                glc: { name: 'GLC', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] }
             }
         },
         audi: {
             name: 'Audi',
             models: {
-                a1: { name: 'A1', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                a3: { name: 'A3', years: ['2024', '2023', '2022', '2021', '2020'] },
-                a4: { name: 'A4', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                q3: { name: 'Q3', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                q5: { name: 'Q5', years: ['2024', '2023', '2022', '2021', '2020'] }
+                a1: { name: 'A1', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                a3: { name: 'A3', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                a4: { name: 'A4', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                q3: { name: 'Q3', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                q5: { name: 'Q5', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] }
             }
         },
         seat: {
             name: 'SEAT',
             models: {
-                ibiza: { name: 'Ibiza', years: ['2024', '2023', '2022', '2021', '2020', '2019', '2018'] },
-                leon: { name: 'León', years: ['2024', '2023', '2022', '2021', '2020', '2019', '2018'] },
-                arona: { name: 'Arona', years: ['2024', '2023', '2022', '2021', '2020', '2019', '2018'] },
-                ateca: { name: 'Ateca', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                tarraco: { name: 'Tarraco', years: ['2024', '2023', '2022', '2021', '2020', '2019'] }
+                ibiza: { name: 'Ibiza', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018'] },
+                leon: { name: 'León', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018'] },
+                arona: { name: 'Arona', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018'] },
+                ateca: { name: 'Ateca', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                tarraco: { name: 'Tarraco', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] }
             }
         },
         toyota: {
             name: 'Toyota',
             models: {
-                corolla: { name: 'Corolla', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                yaris: { name: 'Yaris', years: ['2024', '2023', '2022', '2021', '2020'] },
-                rav4: { name: 'RAV4', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                chr: { name: 'C-HR', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                aygo: { name: 'Aygo X', years: ['2024', '2023', '2022'] }
+                corolla: { name: 'Corolla', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                yaris: { name: 'Yaris', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                rav4: { name: 'RAV4', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                chr: { name: 'C-HR', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                aygo: { name: 'Aygo X', years: ['2026', '2025', '2024', '2023', '2022'] }
             }
         },
         nissan: {
             name: 'Nissan',
             models: {
-                qashqai: { name: 'Qashqai', years: ['2024', '2023', '2022', '2021'] },
-                juke: { name: 'Juke', years: ['2024', '2023', '2022', '2021', '2020'] },
-                xtrail: { name: 'X-Trail', years: ['2024', '2023', '2022'] },
-                leaf: { name: 'Leaf', years: ['2024', '2023', '2022', '2021', '2020'] }
+                qashqai: { name: 'Qashqai', years: ['2026', '2025', '2024', '2023', '2022', '2021'] },
+                juke: { name: 'Juke', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                xtrail: { name: 'X-Trail', years: ['2026', '2025', '2024', '2023', '2022'] },
+                leaf: { name: 'Leaf', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] }
             }
         },
         ford: {
             name: 'Ford',
             models: {
                 fiesta: { name: 'Fiesta', years: ['2023', '2022', '2021', '2020', '2019'] },
-                focus: { name: 'Focus', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                puma: { name: 'Puma', years: ['2024', '2023', '2022', '2021', '2020'] },
-                kuga: { name: 'Kuga', years: ['2024', '2023', '2022', '2021', '2020'] }
+                focus: { name: 'Focus', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                puma: { name: 'Puma', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                kuga: { name: 'Kuga', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] }
             }
         },
         opel: {
             name: 'Opel',
             models: {
-                corsa: { name: 'Corsa', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                astra: { name: 'Astra', years: ['2024', '2023', '2022'] },
-                mokka: { name: 'Mokka', years: ['2024', '2023', '2022', '2021'] },
-                grandland: { name: 'Grandland', years: ['2024', '2023', '2022', '2021', '2020'] }
+                corsa: { name: 'Corsa', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                astra: { name: 'Astra', years: ['2026', '2025', '2024', '2023', '2022'] },
+                mokka: { name: 'Mokka', years: ['2026', '2025', '2024', '2023', '2022', '2021'] },
+                grandland: { name: 'Grandland', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] }
             }
         },
         fiat: {
             name: 'Fiat',
             models: {
-                tipo: { name: 'Tipo', years: ['2024', '2023', '2022', '2021', '2020'] },
-                panda: { name: 'Panda', years: ['2024', '2023', '2022', '2021', '2020'] },
-                '500': { name: '500', years: ['2024', '2023', '2022', '2021', '2020'] },
-                '500x': { name: '500X', years: ['2024', '2023', '2022', '2021', '2020'] }
+                tipo: { name: 'Tipo', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                panda: { name: 'Panda', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                '500': { name: '500', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                '500x': { name: '500X', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] }
             }
         },
         hyundai: {
             name: 'Hyundai',
             models: {
-                tucson: { name: 'Tucson', years: ['2024', '2023', '2022', '2021'] },
-                i20: { name: 'i20', years: ['2024', '2023', '2022', '2021', '2020'] },
-                i30: { name: 'i30', years: ['2024', '2023', '2022', '2021', '2020'] },
-                kona: { name: 'Kona', years: ['2024', '2023', '2022', '2021', '2020'] },
-                bayon: { name: 'Bayon', years: ['2024', '2023', '2022', '2021'] }
+                tucson: { name: 'Tucson', years: ['2026', '2025', '2024', '2023', '2022', '2021'] },
+                i20: { name: 'i20', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                i30: { name: 'i30', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                kona: { name: 'Kona', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                bayon: { name: 'Bayon', years: ['2026', '2025', '2024', '2023', '2022', '2021'] }
             }
         },
         kia: {
             name: 'Kia',
             models: {
-                sportage: { name: 'Sportage', years: ['2024', '2023', '2022'] },
-                ceed: { name: 'Ceed', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                niro: { name: 'Niro', years: ['2024', '2023', '2022'] },
-                stonic: { name: 'Stonic', years: ['2024', '2023', '2022', '2021', '2020'] },
-                picanto: { name: 'Picanto', years: ['2024', '2023', '2022', '2021', '2020'] }
+                sportage: { name: 'Sportage', years: ['2026', '2025', '2024', '2023', '2022'] },
+                ceed: { name: 'Ceed', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                niro: { name: 'Niro', years: ['2026', '2025', '2024', '2023', '2022'] },
+                stonic: { name: 'Stonic', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                picanto: { name: 'Picanto', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] }
             }
         },
         dacia: {
             name: 'Dacia',
             models: {
-                sandero: { name: 'Sandero', years: ['2024', '2023', '2022', '2021'] },
-                duster: { name: 'Duster', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                jogger: { name: 'Jogger', years: ['2024', '2023', '2022'] },
-                spring: { name: 'Spring', years: ['2024', '2023', '2022'] }
+                sandero: { name: 'Sandero', years: ['2026', '2025', '2024', '2023', '2022', '2021'] },
+                duster: { name: 'Duster', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                jogger: { name: 'Jogger', years: ['2026', '2025', '2024', '2023', '2022'] },
+                spring: { name: 'Spring', years: ['2026', '2025', '2024', '2023', '2022'] }
             }
         },
         skoda: {
             name: 'Škoda',
             models: {
-                octavia: { name: 'Octavia', years: ['2024', '2023', '2022', '2021', '2020'] },
-                fabia: { name: 'Fabia', years: ['2024', '2023', '2022'] },
-                karoq: { name: 'Karoq', years: ['2024', '2023', '2022', '2021', '2020'] },
-                kodiaq: { name: 'Kodiaq', years: ['2024', '2023', '2022', '2021'] },
-                kamiq: { name: 'Kamiq', years: ['2024', '2023', '2022', '2021', '2020'] }
+                octavia: { name: 'Octavia', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                fabia: { name: 'Fabia', years: ['2026', '2025', '2024', '2023', '2022'] },
+                karoq: { name: 'Karoq', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                kodiaq: { name: 'Kodiaq', years: ['2026', '2025', '2024', '2023', '2022', '2021'] },
+                kamiq: { name: 'Kamiq', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] }
             }
         },
         volvo: {
             name: 'Volvo',
             models: {
-                xc40: { name: 'XC40', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                xc60: { name: 'XC60', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                xc90: { name: 'XC90', years: ['2024', '2023', '2022', '2021', '2020'] },
-                v60: { name: 'V60', years: ['2024', '2023', '2022', '2021', '2020', '2019'] }
+                xc40: { name: 'XC40', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                xc60: { name: 'XC60', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                xc90: { name: 'XC90', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                v60: { name: 'V60', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] }
             }
         },
         mazda: {
             name: 'Mazda',
             models: {
-                mazda2: { name: 'Mazda2', years: ['2024', '2023', '2022', '2021', '2020'] },
-                mazda3: { name: 'Mazda3', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                cx30: { name: 'CX-30', years: ['2024', '2023', '2022', '2021', '2020'] },
-                cx5: { name: 'CX-5', years: ['2024', '2023', '2022', '2021', '2020', '2019'] },
-                mx5: { name: 'MX-5', years: ['2024', '2023', '2022', '2021', '2020'] }
+                mazda2: { name: 'Mazda2', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                mazda3: { name: 'Mazda3', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                cx30: { name: 'CX-30', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                cx5: { name: 'CX-5', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'] },
+                mx5: { name: 'MX-5', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] }
             }
         },
         cupra: {
             name: 'CUPRA',
             models: {
-                formentor: { name: 'Formentor', years: ['2024', '2023', '2022', '2021', '2020'] },
-                born: { name: 'Born', years: ['2024', '2023', '2022'] },
-                leon: { name: 'León', years: ['2024', '2023', '2022', '2021', '2020'] },
-                ateca: { name: 'Ateca', years: ['2024', '2023', '2022', '2021', '2020'] }
+                formentor: { name: 'Formentor', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                born: { name: 'Born', years: ['2026', '2025', '2024', '2023', '2022'] },
+                leon: { name: 'León', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] },
+                ateca: { name: 'Ateca', years: ['2026', '2025', '2024', '2023', '2022', '2021', '2020'] }
             }
         }
     };
+
+    // Marcas adicionadas (anos gerados a partir de intervalos [de, até])
+    const yrs = (from, to) => Array.from({ length: to - from + 1 }, (_, i) => String(to - i));
+    const brand = (name, models) => ({
+        name,
+        models: Object.fromEntries(Object.entries(models).map(([key, [label, from, to]]) => [key, { name: label, years: yrs(from, to) }]))
+    });
+    Object.assign(vehicleData, {
+        alfaromeo: brand('Alfa Romeo', { giulietta: ['Giulietta', 2012, 2020], giulia: ['Giulia', 2016, 2026], stelvio: ['Stelvio', 2017, 2026], tonale: ['Tonale', 2022, 2026], junior: ['Junior', 2024, 2026] }),
+        byd: brand('BYD', { atto3: ['Atto 3', 2022, 2026], dolphin: ['Dolphin', 2023, 2026], dolphinsurf: ['Dolphin Surf', 2025, 2026], atto2: ['Atto 2', 2025, 2026], seal: ['Seal', 2023, 2026], sealu: ['Seal U', 2024, 2026], sealion7: ['Sealion 7', 2025, 2026] }),
+        chery: brand('Chery', { tiggo4: ['Tiggo 4', 2025, 2026], tiggo7: ['Tiggo 7', 2025, 2026], tiggo8: ['Tiggo 8', 2025, 2026] }),
+        chevrolet: brand('Chevrolet', { spark: ['Spark', 2010, 2015], aveo: ['Aveo', 2011, 2015], cruze: ['Cruze', 2009, 2015], trax: ['Trax', 2013, 2015], captiva: ['Captiva', 2011, 2015] }),
+        ds: brand('DS', { ds3: ['DS 3', 2019, 2026], ds4: ['DS 4', 2021, 2026], ds7: ['DS 7', 2018, 2026] }),
+        honda: brand('Honda', { jazz: ['Jazz', 2015, 2026], civic: ['Civic', 2017, 2026], hrv: ['HR-V', 2015, 2026], zrv: ['ZR-V', 2023, 2026], crv: ['CR-V', 2018, 2026] }),
+        jaguar: brand('Jaguar', { xe: ['XE', 2015, 2024], epace: ['E-Pace', 2018, 2024], fpace: ['F-Pace', 2016, 2026], ipace: ['I-Pace', 2018, 2024] }),
+        jeep: brand('Jeep', { avenger: ['Avenger', 2023, 2026], renegade: ['Renegade', 2015, 2026], compass: ['Compass', 2017, 2026], wrangler: ['Wrangler', 2018, 2026], grandcherokee: ['Grand Cherokee', 2022, 2026] }),
+        kgm: brand('KGM (SsangYong)', { tivoli: ['Tivoli', 2015, 2026], korando: ['Korando', 2019, 2026], torres: ['Torres', 2023, 2026], rexton: ['Rexton', 2017, 2026] }),
+        landrover: brand('Land Rover', { evoque: ['Range Rover Evoque', 2019, 2026], discoverysport: ['Discovery Sport', 2015, 2026], velar: ['Range Rover Velar', 2017, 2026], defender: ['Defender', 2020, 2026], rrsport: ['Range Rover Sport', 2022, 2026] }),
+        leapmotor: brand('Leapmotor', { t03: ['T03', 2024, 2026], b10: ['B10', 2025, 2026], c10: ['C10', 2024, 2026] }),
+        lexus: brand('Lexus', { lbx: ['LBX', 2024, 2026], ux: ['UX', 2019, 2026], nx: ['NX', 2015, 2026], rx: ['RX', 2016, 2026] }),
+        lynkco: brand('Lynk & Co', { '01': ['01', 2021, 2026] }),
+        maxus: brand('Maxus', { edeliver3: ['eDeliver 3', 2021, 2026], deliver9: ['Deliver 9', 2020, 2026] }),
+        mg: brand('MG', { mg3: ['MG3', 2024, 2026], zs: ['ZS', 2017, 2026], mg4: ['MG4', 2022, 2026], hs: ['HS', 2019, 2026], marvelr: ['Marvel R', 2021, 2023] }),
+        mini: brand('MINI', { cooper: ['Cooper (3 portas)', 2014, 2026], aceman: ['Aceman', 2024, 2026], clubman: ['Clubman', 2015, 2024], countryman: ['Countryman', 2017, 2026] }),
+        mitsubishi: brand('Mitsubishi', { spacestar: ['Space Star', 2013, 2024], colt: ['Colt', 2023, 2026], asx: ['ASX', 2010, 2026], eclipsecross: ['Eclipse Cross', 2018, 2026], outlander: ['Outlander', 2013, 2026] }),
+        omoda: brand('Omoda', { omoda5: ['Omoda 5', 2024, 2026], omoda9: ['Omoda 9', 2025, 2026] }),
+        jaecoo: brand('Jaecoo', { jaecoo7: ['Jaecoo 7', 2024, 2026] }),
+        polestar: brand('Polestar', { p2: ['Polestar 2', 2020, 2026], p3: ['Polestar 3', 2024, 2026], p4: ['Polestar 4', 2024, 2026] }),
+        porsche: brand('Porsche', { macan: ['Macan', 2014, 2026], cayenne: ['Cayenne', 2018, 2026], taycan: ['Taycan', 2020, 2026], panamera: ['Panamera', 2017, 2026], p911: ['911', 2019, 2026] }),
+        smart: brand('smart', { fortwo: ['fortwo', 2015, 2024], s1: ['#1', 2023, 2026], s3: ['#3', 2024, 2026] }),
+        subaru: brand('Subaru', { crosstrek: ['XV / Crosstrek', 2018, 2026], forester: ['Forester', 2019, 2026], outback: ['Outback', 2021, 2026] }),
+        suzuki: brand('Suzuki', { ignis: ['Ignis', 2017, 2024], swift: ['Swift', 2017, 2026], vitara: ['Vitara', 2015, 2026], scross: ['S-Cross', 2014, 2026], jimny: ['Jimny', 2018, 2026] }),
+        tesla: brand('Tesla', { model3: ['Model 3', 2019, 2026], modely: ['Model Y', 2021, 2026], models: ['Model S', 2014, 2026], modelx: ['Model X', 2016, 2026] })
+    });
 
     const marcaSelect = document.getElementById('marca');
     const modeloSelect = document.getElementById('modelo');
     const anioSelect = document.getElementById('anio');
     const resultado = document.getElementById('configuradorResultado');
+
+    // Opções de marca geradas a partir dos dados (ordem alfabética)
+    Object.entries(vehicleData)
+        .sort(([, a], [, b]) => a.name.localeCompare(b.name, 'pt'))
+        .forEach(([key, b]) => marcaSelect.appendChild(new Option(b.name.toUpperCase(), key)));
 
     marcaSelect.addEventListener('change', () => {
         const marca = marcaSelect.value;

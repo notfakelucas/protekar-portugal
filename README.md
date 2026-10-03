@@ -5,7 +5,8 @@ Website da **ProTekar Portugal** — Tapetes 3D premium feitos à medida para au
 ## Funcionalidades
 - Landing page dark premium com acentos dourados (Space Grotesk / Sora / Inter)
 - Bloco de oferta com preço fixo configurável (`KIT_PRICE` em `app.js`)
-- Configurador de veículos com 20 marcas populares em Portugal
+- Configurador de veículos com 45 marcas presentes em Portugal (modelos até 2026)
+- Fotos ampliáveis (lightbox) na oferta, carrossel, detalhes e avaliações
 - Comparador antes/depois deslizante e tabela ProTekar vs comum
 - Carrossel de fotos do produto instalado e detalhes técnicos
 - Secção de avaliações preenchida a partir de `reviews.js` (oculta enquanto estiver vazia)

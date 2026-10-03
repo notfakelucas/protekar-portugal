@@ -119,26 +119,6 @@
             <div class="config-grid">
                 <select id="marca" aria-label="Marca">
                     <option value="">Marca</option>
-                    <option value="audi">AUDI</option>
-                    <option value="bmw">BMW</option>
-                    <option value="citroen">CITROËN</option>
-                    <option value="cupra">CUPRA</option>
-                    <option value="dacia">DACIA</option>
-                    <option value="fiat">FIAT</option>
-                    <option value="ford">FORD</option>
-                    <option value="hyundai">HYUNDAI</option>
-                    <option value="kia">KIA</option>
-                    <option value="mazda">MAZDA</option>
-                    <option value="mercedes">MERCEDES-BENZ</option>
-                    <option value="nissan">NISSAN</option>
-                    <option value="opel">OPEL</option>
-                    <option value="peugeot">PEUGEOT</option>
-                    <option value="renault">RENAULT</option>
-                    <option value="seat">SEAT</option>
-                    <option value="skoda">ŠKODA</option>
-                    <option value="toyota">TOYOTA</option>
-                    <option value="volkswagen">VOLKSWAGEN</option>
-                    <option value="volvo">VOLVO</option>
                 </select>
                 <select id="modelo" aria-label="Modelo" disabled>
                     <option value="">Modelo</option>
@@ -321,6 +301,17 @@
             <p class="footer-bottom">© 2026 ProTekar Portugal · Todos os direitos reservados</p>
         </div>
     </footer>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Foto ampliada" hidden>
+        <button class="lb-close" id="lbClose" aria-label="Fechar">✕</button>
+        <button class="lb-nav lb-prev" id="lbPrev" aria-label="Foto anterior">‹</button>
+        <figure class="lb-figure">
+            <img id="lbImg" alt="">
+            <figcaption id="lbCaption"></figcaption>
+        </figure>
+        <button class="lb-nav lb-next" id="lbNext" aria-label="Foto seguinte">›</button>
+    </div>
 
     <!-- Sticky buy bar -->
     <div class="sticky" id="buybar">
