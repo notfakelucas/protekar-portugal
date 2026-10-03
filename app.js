@@ -5,7 +5,7 @@
 // Preço do kit completo (dianteiros + traseiros), IVA incluído.
 const KIT_PRICE = 79.90;
 // URL do checkout. São acrescentados ?marca=&modelo=&ano= ao selecionar o carro.
-const CHECKOUT_URL = '#';
+const CHECKOUT_URL = '/checkout.html';
 
 const formatEUR = (n) => new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(n);
 

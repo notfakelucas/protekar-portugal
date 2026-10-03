@@ -28,6 +28,18 @@ python3 -m http.server 8080
 npx serve .
 ```
 
+## Checkout e pagamentos
+O checkout (`checkout.html`) cria o pagamento no **Stripe** através da função `api/checkout.js` (Vercel).
+
+1. Crie uma conta no Stripe e copie a chave secreta (`sk_test_...` para testes, `sk_live_...` em produção).
+2. Na Vercel → projeto → Settings → Environment Variables, adicione `STRIPE_SECRET_KEY`.
+3. Opcional: `SITE_URL` (ex.: `https://protekar-portugal.vercel.app`).
+4. Ative MB WAY e Multibanco em Stripe → Settings → Payment methods.
+5. Redeploy. As encomendas aparecem no painel do Stripe com veículo, telemóvel e morada.
+
+Preços, envios, extras e textos: `checkout-config.json` (valores em cêntimos, IVA incluído).
+`compareAt` e `promoEndsAt` só devem ser preenchidos com um preço anterior e uma data de fim reais.
+
 ## Estrutura
 ```
 protekar-portugal/
@@ -35,6 +47,10 @@ protekar-portugal/
 ├── index.css     # Estilos e sistema de design
 ├── app.js        # Lógica da aplicação (KIT_PRICE, CHECKOUT_URL)
 ├── reviews.js    # Avaliações reais de clientes de Portugal
+├── checkout.html # Checkout (checkout.css, checkout.js)
+├── checkout-config.json # Preços, envios, extras e textos do checkout
+├── obrigado.html # Página após o pagamento
+├── api/checkout.js # Função serverless que cria a sessão do Stripe
 ├── images/       # Fotos do produto
 └── README.md     # Este ficheiro
 ```

@@ -1,0 +1,89 @@
+{
+  "country": "PT",
+  "currency": "eur",
+  "locale": "pt",
+  "numberLocale": "pt-PT",
+  "product": {
+    "name": "Kit Tapetes 3D",
+    "description": "Cortado à medida do seu veículo",
+    "price": 7990,
+    "image": "images/basico.webp",
+    "compareAt": null
+  },
+  "shipping": [
+    {
+      "id": "estandar",
+      "name": "Envio Normal",
+      "tag": "INCLUÍDO",
+      "eta": "Chega em 4 a 8 dias úteis",
+      "note": "Expedição em 24–48 h · código de seguimento por email e WhatsApp",
+      "price": 0,
+      "minDays": 4,
+      "maxDays": 8
+    },
+    {
+      "id": "prioritario",
+      "name": "Envio Prioritário",
+      "tag": "MAIS RÁPIDO",
+      "eta": "Chega em 2 a 4 dias úteis",
+      "note": "Preparação prioritária · sai primeiro do nosso armazém, com seguimento em tempo real",
+      "price": 490,
+      "minDays": 2,
+      "maxDays": 4
+    }
+  ],
+  "bumps": [
+    {
+      "id": "aspirador",
+      "name": "Aspirador Portátil 12V",
+      "description": "Aspira migalhas, pó e pelos. Liga-se ao isqueiro do seu carro.",
+      "price": 1490,
+      "image": "images/bump-aspirador.jpg"
+    },
+    {
+      "id": "humidificador",
+      "name": "Humidificador Aromático",
+      "description": "Difusor com luz LED. Um ambiente fresco em cada viagem.",
+      "price": 990,
+      "image": "images/bump-humidificador.png"
+    }
+  ],
+  "promoEndsAt": null,
+  "_ajuda": {
+    "compareAt": "Preço anterior em cêntimos (ex.: 10990). Apenas se for o preço mais baixo praticado nos 30 dias anteriores (Diretiva Omnibus). null = não mostra preço riscado.",
+    "promoEndsAt": "Data real de fim da promoção, ISO 8601 (ex.: 2026-10-31T23:59:59+00:00). null = não mostra contagem decrescente.",
+    "precos": "Todos os valores em cêntimos de euro, IVA incluído."
+  },
+  "regions": [
+    "Aveiro", "Beja", "Braga", "Bragança", "Castelo Branco", "Coimbra", "Évora", "Faro", "Guarda",
+    "Leiria", "Lisboa", "Portalegre", "Porto", "Santarém", "Setúbal", "Viana do Castelo", "Vila Real", "Viseu"
+  ],
+  "postalPattern": "^\\d{4}-\\d{3}$",
+  "text": {
+    "vehicle": "O seu veículo",
+    "subtotal": "Subtotal",
+    "discount": "Desconto",
+    "shipping": "Envio",
+    "free": "Grátis",
+    "saved": "Poupa {amount} nesta encomenda",
+    "required": "Verifique os campos assinalados a vermelho.",
+    "invalidEmail": "O email não é válido.",
+    "invalidPostal": "O código postal deve ter o formato 0000-000.",
+    "redirecting": "A redirecionar para o pagamento seguro…",
+    "network": "Não foi possível ligar. Verifique a sua ligação e tente novamente.",
+    "reviews1": "· 1 avaliação",
+    "reviewsN": "· {n} avaliações",
+    "verified": "Compra verificada"
+  },
+  "successPage": "obrigado.html",
+  "apiText": {
+    "method": "Método não permitido",
+    "notConfigured": "Os pagamentos ainda não estão configurados. Tente mais tarde.",
+    "badRequest": "Pedido inválido",
+    "missing": "Faltam dados obrigatórios",
+    "badEmail": "Email inválido",
+    "badYear": "Ano inválido",
+    "stripeFailed": "Não foi possível iniciar o pagamento. Tente novamente.",
+    "stripeUnreachable": "Não foi possível ligar ao serviço de pagamento."
+  }
+}
