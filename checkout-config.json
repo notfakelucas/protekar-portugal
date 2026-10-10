@@ -30,26 +30,27 @@
       "features": ["3 tapetes interiores à medida", "Traseiro inteiriço c/ proteção central", "Tapete de bagageira premium", "OFERTA: Ambientador grátis"]
     }
   ],
+  "onlineDiscount": 5,
   "shipping": [
     {
       "id": "estandar",
-      "name": "Envio Normal",
+      "name": "Envio normal — FedEx",
       "tag": "INCLUÍDO",
-      "eta": "Chega em 4 a 8 dias úteis",
+      "eta": "Chega em até 6 dias úteis",
       "note": "Expedição em 24–48 h · código de seguimento por email e WhatsApp",
       "price": 0,
       "minDays": 4,
-      "maxDays": 8
+      "maxDays": 6
     },
     {
       "id": "prioritario",
-      "name": "Envio Prioritário",
+      "name": "Envio expresso — DHL Express",
       "tag": "MAIS RÁPIDO",
-      "eta": "Chega em 2 a 4 dias úteis",
+      "eta": "Chega em 1 dia útil",
       "note": "Preparação prioritária · sai primeiro do nosso armazém, com seguimento em tempo real",
-      "price": 490,
-      "minDays": 2,
-      "maxDays": 4
+      "price": 900,
+      "minDays": 1,
+      "maxDays": 1
     }
   ],
   "bumps": [
@@ -57,7 +58,8 @@
       "id": "aspirador",
       "name": "Aspirador Portátil 12V",
       "description": "Aspira migalhas, pó e pelos. Liga-se ao isqueiro do seu carro.",
-      "price": 1490,
+      "price": 790,
+      "compareAt": 1290,
       "image": "images/bump-aspirador.jpg"
     },
     {
@@ -65,6 +67,7 @@
       "name": "Humidificador Aromático",
       "description": "Difusor com luz LED. Um ambiente fresco em cada viagem.",
       "price": 990,
+      "compareAt": 1490,
       "image": "images/bump-humidificador.png"
     }
   ],

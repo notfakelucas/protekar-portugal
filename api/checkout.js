@@ -82,6 +82,8 @@ module.exports = async (req, res) => {
     const product = kit
         ? { name: kit.name, description: config.product.description, price: kit.price, image: kit.image }
         : config.product;
+    const onlinePct = Number(config.onlineDiscount) || 0;
+    const unitAmount = Math.floor(product.price * (1 - onlinePct / 100));
 
     const proto = req.headers['x-forwarded-proto'] || 'https';
     const origin = (process.env.SITE_URL || `${proto}://${req.headers.host}`).replace(/\/$/, '');
@@ -92,7 +94,7 @@ module.exports = async (req, res) => {
             quantity: 1,
             price_data: {
                 currency: config.currency,
-                unit_amount: product.price,
+                unit_amount: unitAmount,
                 product_data: {
                     name: `${product.name} – ${vehiculo}`,
                     description: product.description,
