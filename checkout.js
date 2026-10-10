@@ -23,6 +23,11 @@
     $('vehicleCard').hidden = hasVehicle;
     if (!hasVehicle) $('vehicleCard').querySelectorAll('input').forEach(i => { i.value = vehicle[i.name] || ''; });
 
+    // ---- Selected kit (?kit=) sets the product price/name/image (server revalidates) ----
+    const kits = Array.isArray(cfg.kits) ? cfg.kits : [];
+    const kit = kits.find(k => k.id === params.get('kit')) || kits.find(k => k.id === cfg.defaultKit) || null;
+    if (kit) cfg.product = { ...cfg.product, name: kit.name, price: kit.price, image: kit.image, compareAt: kit.compareAt };
+
     // ---- Regions ----
     const regionSelect = form.elements.region;
     cfg.regions.forEach(r => regionSelect.appendChild(new Option(r, r)));
@@ -179,6 +184,7 @@
         const v = currentVehicle();
         const payload = {
             ...v,
+            kit: kit ? kit.id : '',
             nombre: form.elements.nombre.value,
             email,
             telefono: form.elements.telefono.value,

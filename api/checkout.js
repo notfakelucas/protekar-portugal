@@ -76,6 +76,13 @@ module.exports = async (req, res) => {
     const bumps = config.bumps.filter(b => bumpIds.includes(b.id));
     const vehiculo = `${f.marca} ${f.modelo} ${f.anio}`;
 
+    // Kit escolhido (preço SEMPRE do servidor). Fallback para o kit por omissão / produto.
+    const kits = Array.isArray(config.kits) ? config.kits : [];
+    const kit = kits.find(k => k.id === body.kit) || kits.find(k => k.id === config.defaultKit) || null;
+    const product = kit
+        ? { name: kit.name, description: config.product.description, price: kit.price, image: kit.image }
+        : config.product;
+
     const proto = req.headers['x-forwarded-proto'] || 'https';
     const origin = (process.env.SITE_URL || `${proto}://${req.headers.host}`).replace(/\/$/, '');
     const imageUrl = (path) => `${origin}/${path.replace(/^\//, '')}`;
@@ -85,11 +92,11 @@ module.exports = async (req, res) => {
             quantity: 1,
             price_data: {
                 currency: config.currency,
-                unit_amount: config.product.price,
+                unit_amount: product.price,
                 product_data: {
-                    name: `${config.product.name} – ${vehiculo}`,
-                    description: config.product.description,
-                    images: [imageUrl(config.product.image)]
+                    name: `${product.name} – ${vehiculo}`,
+                    description: product.description,
+                    images: [imageUrl(product.image)]
                 }
             }
         },
@@ -105,6 +112,7 @@ module.exports = async (req, res) => {
 
     const metadata = {
         vehiculo,
+        kit: kit ? kit.id : '',
         nombre: f.nombre,
         telefono: f.telefono,
         nif: f.nif,
@@ -129,7 +137,7 @@ module.exports = async (req, res) => {
             }
         }],
         payment_intent_data: {
-            description: `${config.product.name} – ${vehiculo}`,
+            description: `${product.name} – ${vehiculo}`,
             metadata,
             shipping: {
                 name: f.nombre,
@@ -145,7 +153,7 @@ module.exports = async (req, res) => {
         },
         metadata,
         success_url: `${origin}/${config.successPage}?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${origin}/checkout.html?${new URLSearchParams({ marca: f.marca, modelo: f.modelo, anio: f.anio })}`
+        cancel_url: `${origin}/checkout.html?${new URLSearchParams({ marca: f.marca, modelo: f.modelo, anio: f.anio, kit: kit ? kit.id : '' })}`
     };
 
     try {

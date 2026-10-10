@@ -6,10 +6,30 @@
   "product": {
     "name": "Kit Tapetes 3D",
     "description": "Cortado à medida do seu veículo",
-    "price": 7990,
-    "image": "images/basico.webp",
-    "compareAt": null
+    "price": 4990,
+    "image": "images/completo.webp",
+    "compareAt": 8990
   },
+  "defaultKit": "completo",
+  "kits": [
+    {
+      "id": "basico",
+      "name": "Kit Básico",
+      "price": 3490,
+      "compareAt": 5990,
+      "image": "images/basico.webp",
+      "features": ["3 tapetes interiores à medida", "Traseiro inteiriço c/ proteção central"]
+    },
+    {
+      "id": "completo",
+      "name": "Kit Completo",
+      "badge": "MAIS VENDIDO",
+      "price": 4990,
+      "compareAt": 8990,
+      "image": "images/completo.webp",
+      "features": ["3 tapetes interiores à medida", "Traseiro inteiriço c/ proteção central", "Tapete de bagageira premium", "OFERTA: Ambientador grátis"]
+    }
+  ],
   "shipping": [
     {
       "id": "estandar",

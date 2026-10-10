@@ -2,16 +2,28 @@
    ProTekar Portugal - App Logic
    ======================================== */
 
-// Preço do kit completo (dianteiros + traseiros), IVA incluído.
-const KIT_PRICE = 79.90;
-// URL do checkout. São acrescentados ?marca=&modelo=&ano= ao selecionar o carro.
+// Kits disponíveis (preços em euros, IVA incluído). Têm de coincidir com checkout-config.json.
+const KITS = [
+    {
+        id: 'basico', name: 'Kit Básico', price: 34.90, compareAt: 59.90,
+        features: ['3 tapetes interiores à medida', 'Traseiro inteiriço c/ proteção central']
+    },
+    {
+        id: 'completo', name: 'Kit Completo', badge: 'MAIS VENDIDO', price: 49.90, compareAt: 89.90,
+        features: ['3 tapetes interiores à medida', 'Traseiro inteiriço c/ proteção central', 'Tapete de bagageira premium', 'OFERTA: Ambientador grátis']
+    }
+];
+const DEFAULT_KIT = 'completo';
+const FROM_PRICE = Math.min(...KITS.map(k => k.price));
+let selectedKit = DEFAULT_KIT;
+// URL do checkout. São acrescentados ?marca=&modelo=&ano=&kit= ao selecionar o carro.
 const CHECKOUT_URL = '/checkout.html';
 
 const formatEUR = (n) => new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(n);
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    document.querySelectorAll('[data-price]').forEach(el => { el.textContent = formatEUR(KIT_PRICE); });
+    document.querySelectorAll('[data-price]').forEach(el => { el.textContent = formatEUR(FROM_PRICE); });
 
     // ---- Menu lateral ----
     const navToggle = document.getElementById('navToggle');
@@ -433,28 +445,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
     anioSelect.addEventListener('change', updateResult);
 
+    const kitPct = (k) => Math.round((1 - k.price / k.compareAt) * 100);
+
+    function checkoutHref() {
+        if (CHECKOUT_URL === '#') return '#';
+        const marca = marcaSelect.value, modelo = modeloSelect.value, anio = anioSelect.value;
+        const base = { kit: selectedKit };
+        if (marca && modelo && anio) {
+            Object.assign(base, { marca: vehicleData[marca].name, modelo: vehicleData[marca].models[modelo].name, ano: anio });
+        }
+        return `${CHECKOUT_URL}?${new URLSearchParams(base)}`;
+    }
+
+    function renderKitPicker() {
+        const active = KITS.find(k => k.id === selectedKit) || KITS[0];
+        const cards = KITS.map(k => `
+            <label class="kit ${k.id === selectedKit ? 'on' : ''}">
+                <input type="radio" name="kit" value="${k.id}" ${k.id === selectedKit ? 'checked' : ''}>
+                <span class="kit-ck"></span>
+                <span class="kit-body">
+                    <span class="kit-head"><b>${escapeHTML(k.name)}</b>${k.badge ? `<span class="kit-badge">${escapeHTML(k.badge)}</span>` : ''}</span>
+                    <ul class="kit-feats">${k.features.map(f => `<li>${escapeHTML(f)}</li>`).join('')}</ul>
+                </span>
+                <span class="kit-price">
+                    <span class="kit-now">${formatEUR(k.price)}</span>
+                    <s class="kit-old">${formatEUR(k.compareAt)}</s>
+                    <span class="kit-off">−${kitPct(k)}%</span>
+                </span>
+            </label>`).join('');
+        return `
+            <div class="kit-eyebrow">ESCOLHA O SEU KIT</div>
+            <h3 class="kit-pick-title">Selecione a proteção ideal</h3>
+            <div class="kit-list">${cards}</div>
+            <div class="kit-total">
+                <span class="kit-total-l">TOTAL DO KIT <span class="kit-off">−${kitPct(active)}%</span></span>
+                <span class="kit-total-r"><span class="kit-now">${formatEUR(active.price)}</span> <s class="kit-old">${formatEUR(active.compareAt)}</s></span>
+            </div>
+            <p class="kit-ship">🚚 PORTES GRÁTIS · Pagamento 100% seguro com cartão</p>
+            <a href="${checkoutHref()}" class="result-cta kit-cta">COMPRAR AGORA →</a>
+            <p class="kit-trust">🔒 Compra segura · Garantia de 3 anos · À medida</p>
+        `;
+    }
+
     function updateResult() {
-        const marca = marcaSelect.value;
-        const modelo = modeloSelect.value;
-        const anio = anioSelect.value;
+        const marca = marcaSelect.value, modelo = modeloSelect.value, anio = anioSelect.value;
 
         if (marca && modelo && anio) {
             const brandName = vehicleData[marca].name;
             const modelName = vehicleData[marca].models[modelo].name;
-            const params = new URLSearchParams({ marca: brandName, modelo: modelName, ano: anio });
-            const href = CHECKOUT_URL === '#' ? '#' : `${CHECKOUT_URL}?${params}`;
-
+            resultado.classList.add('has-vehicle');
             resultado.innerHTML = `
-                <span class="result-label">O seu veículo</span>
-                <div class="result-vehicle">${brandName} ${modelName} ${anio}</div>
-                <span class="result-price">${formatEUR(KIT_PRICE)}</span>
-                <p class="result-text">Kit completo (dianteiros + traseiros) · IVA incluído · Envio grátis para Portugal continental</p>
-                <a href="${href}" class="result-cta">Comprar agora →</a>
+                <div class="result-avail">
+                    <span class="result-avail-ic">✓</span>
+                    <span class="result-avail-txt"><b>Disponível para ${escapeHTML(modelName)}</b><span class="result-avail-sub">Fabrico à medida · ${escapeHTML(brandName)} ${escapeHTML(anio)}</span></span>
+                </div>
+                ${renderKitPicker()}
             `;
+            resultado.querySelectorAll('input[name="kit"]').forEach(radio => {
+                radio.addEventListener('change', () => { selectedKit = radio.value; updateResult(); });
+            });
         } else {
+            resultado.classList.remove('has-vehicle');
             resultado.innerHTML = `
                 <span class="result-label">Desde</span>
-                <span class="result-price">${formatEUR(KIT_PRICE)}</span>
+                <span class="result-price">${formatEUR(FROM_PRICE)}</span>
                 <p class="result-text">Selecione o seu veículo acima para ver o seu kit à medida</p>
             `;
         }
